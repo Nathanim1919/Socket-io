@@ -8,7 +8,7 @@ const {
   AvailableSocialLogins,
   AvailableUsersRole,
   UserRolesEnum,
-} = require("../constants/");
+} = require("../constants");
 
 const userSchema = new Schema(
   {
@@ -114,7 +114,7 @@ userSchema.methods.generateAccessToken = function () {
       role: this.role,
     },
     process.env.ACCESS_TOKEN_SECRET,
-    { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
+    { expiresIn: process.env.USER_TOKEN_EXPIRY }
   );
 };
 
@@ -129,7 +129,7 @@ userSchema.methods.generateRefreshToken = function () {
       _id: this._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
-    { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    { expiresIn: process.env. USER_REFRESH_TOKEN_EXPIRY }
   );
 };
 
