@@ -77,7 +77,6 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-
 /**
  * @description Method responsible for hashing password before saving it to database
  */
@@ -88,9 +87,6 @@ userSchema.pre('save', async function(next){
   next();
 })
 
-
-
-
 /**
  * @param {*} password 
  * @description Method responsible for comparing password with the hashed password in database 
@@ -98,8 +94,6 @@ userSchema.pre('save', async function(next){
  */
 userSchema.methods.isPasswordCorrect = async (password) =>
   await bcrypt.compare(password, this.password);
-
-
 
 /**
  * @description Method responsible for generating access token
@@ -157,6 +151,5 @@ userSchema.methods.generateTemporaryToken = function () {
     tokenExpiry,
   };
 };
-
 
 export const User = mongoose.model('User', userSchema);
