@@ -234,7 +234,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
  * This controller will send the verification email again to the user's email address.
  */
 
-const resendEmailVerfication = asyncHandler(async (req, res) => {
+const resendEmailVerification = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (!user) {
@@ -309,16 +309,158 @@ const forgotPasswordRequest = asyncHandler(async (req, res) => {
   });
   return res
     .status(200)
-    .json(
-      new Apiresponse(
-        200,
-        {  },
-        "Password reset email sent successfully"
-      )
-    );
+    .json(new Apiresponse(200, {}, "Password reset email sent successfully"));
 });
 
-
 const refreshAccessToken = asyncHandler(async (req, res) => {
-  
+  const incomingRefreshToken =
+    req.cookies.refreshToken ||
+    req.headers["x-refresh-token"] ||
+    req.body.refreshToken;
+
+  if (!incomingRefreshToken) {
+    throw new Error("Refresh token missing");
+  }
+
+  // generate a hash from the token that we are receiving
+
+  try {
+    const decodedToken = jwt.verify(
+      incomingRefreshToken,
+      process.env.JWT_SECRET
+    );
+
+    const user = await User.findById(decodedToken?._id);
+
+    if (!user) {
+      throw new Error("Invalid Refresh Token");
+    }
+
+    // check if incoming refresh token is same as the one saved in the database
+    // This shows that the refresh token is used or not
+    // Once it is used, we are replacing the refresh token with a new one
+
+    if (incomingRefreshToken !== user?.refreshToken) {
+      throw new Error("Invalid refresh token");
+    }
+
+    const { accessToken, refreshToken: newRefreshToken } =
+      await generateAccessAndRefreshTokens(user._id);
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken)
+      .cookie("refreshToken", newRefreshToken)
+      .json(
+        new Apiresponse(
+          200,
+          { accessToken, refreshToken: newRefreshToken },
+          "Access token refreshed"
+        )
+      );
+  } catch (error) {
+    throw new Error("Invalid refresh token");
+  }
+});
+
+const resetForgottenPassword = asyncHandler(async (req, res) => {
+  const { resetToken } = req.params;
+  const { newPassword } = req.body;
+
+  // Create a hash of the incoming reset token
+  let hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // See if user with hash similar to resetToken exists
+  // If yes then check if token expiry is greater than current date
+
+  const user = await User.findOne({
+    forgotPasswordToken: hashedToken,
+    forgotPasswordExpiry: { $gt: Date.now() },
+  });
+
+  // If either of the one is false that means the token is invalid or expired
+  if (!user) {
+    throw new Error("Token is invalid or expired");
+  }
+
+  // if everything is ok and token id valid
+  // reset the forgot password token and expiry
+  user.forgotPasswordToken = undefined;
+  user.forgotPasswordExpiry = undefined;
+
+  // set the provided password as the new password
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+  return res
+    .status(200)
+    .json(new Apiresponse(200, {}, "Password reset successfully"));
+});
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+  const { oldPassword, newPassword } = req.body;
+
+  const user = await User.findById(req.user?._id);
+
+  //  check the old password
+  const isPasswordValid = await user.isPasswordCorrect(oldPassword);
+
+  if (!isPasswordValid) {
+    throw new Error("Invalid old password");
+  }
+
+  // assign new password in plain text
+  // we have a pre save method attached to user schema which automatically hashes the password whenever added/modified
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new Apiresponse(200, {}, "Password changed successfully"));
+});
+
+const assignRole = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const { role } = req.body;
+  const user = await User.findById(userId);
+
+  if (!user) {
+    throw new Error("User does not exist");
+  }
+
+  user.role = role;
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new Apiresponse(200, {}, "Role changed for the user"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res
+  .status(200)
+  .json(new Apiresponse(200, req.user, "Current user fetched successfully"));
+});
+
+const handleSocialLogin = asyncHandler(async (req, res) => {
+
 })
+
+
+export {
+  assignRole,
+  changeCurrentPassword,
+  forgotPasswordRequest,
+  getCurrentUser,
+  handleSocialLogin,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
+  resendEmailVerification,
+  resetForgottenPassword,
+  // updateUserAvatar,
+  verifyEmail,
+};
