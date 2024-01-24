@@ -1,31 +1,20 @@
-/**
- * @type {{ADMIN:"ADMIN"; USER:"USER"} as const}
- */
-
-export const UserRolesEnum = {
+ const UserRolesEnum = {
     ADMIN:"ADMIN",
     USER:"USER"
 };
 
-export const AvailableUsersRole = Object.values(UserRolesEnum);
+ const AvailableUsersRole = Object.values(UserRolesEnum);
 
-/**
- * @type {{GOOGLE:"GOOGLE"; GITHUB:"GITHUB"; EMAIL_PASSWORD:"EMAIL_PASSWORD"} as const}
- */
-
-export const UserLoginType = {
+ const UserLoginType = {
     GOOGLE:"GOOGLE",
     GITHUB:"GITHUB",
     EMAIL_PASSWORD:"EMAIL_PASSWORD"
 }
 
-export const AvailableSocialLogins = Object.values(UserLoginType);
+ const AvailableSocialLogins = Object.values(UserLoginType);
 
 
-/**
- * @description set of events that we are using in chat app. more to be added as we develop the chat app
- */
-export const ChatEventEnum = Object.freeze({
+ const ChatEventEnum = Object.freeze({
     // ? once user is ready to go
     CONNECTED_EVENT: "connected",
     // ? when user gets disconnected
@@ -48,4 +37,14 @@ export const ChatEventEnum = Object.freeze({
     TYPING_EVENT: "typing",
   });
 
-  export const AvailableChatEvents = Object.values(ChatEventEnum);
+ const AvailableChatEvents = Object.values(ChatEventEnum);
+
+
+ module.exports = {
+    UserRolesEnum,
+    AvailableUsersRole,
+    UserLoginType,
+    AvailableSocialLogins,
+    ChatEventEnum,
+    AvailableChatEvents
+ }

@@ -1,4 +1,4 @@
-const { Mailgen } = require("mailgen");
+const Mailgen = require("mailgen");
 const nodemailer = require("nodemailer");
 
 /**
@@ -15,6 +15,8 @@ const sendEmail = async (options) => {
     },
   });
 
+  console.log("mailGenerator instance:", mailGenerator);
+
   //   Generate xthe plaintext version of the e-mail (for clients that do not support HTML)
   const emailTextual = mailGenerator.generatePlaintext(options.mailGenContent);
 
@@ -22,18 +24,27 @@ const sendEmail = async (options) => {
   const emailHtml = mailGenerator.generate(options.mailGenContent);
 
   //  Create a nodemailer transporter using smtp which is responsible for sending email
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT,
-    // secure: false,
+  // const transporter = nodemailer.createTransport({
+  //   host: process.env.SMTP_HOST,
+  //   port: process.env.SMTP_PORT,
+  //   // secure: false,
+  //   auth: {
+  //     user: process.env.SMTP_USERNAME,
+  //     pass: process.env.SMTP_PASSWORD,
+  //   },
+  // });
+  
+  var transporter = nodemailer.createTransport({
+    host: "sandbox.smtp.mailtrap.io",
+    port: 2525,
     auth: {
-      user: process.env.SMTP_USERNAME,
-      pass: process.env.SMTP_PASSWORD,
-    },
+      user: "33cd5d7cfdf896",
+      pass: "beba3a758762bd"
+    }
   });
 
   const mail = {
-    from: "mail.nathan21t19@gmail.com",
+    from: "mail.nathanim2tadele@gmail.com",
     to: options.email,
     subject: options.subject,
     text: emailTextual,
