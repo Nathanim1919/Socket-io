@@ -1,11 +1,12 @@
 const express = require("express");
-const { cookie } = require("express-validator");
 const app = express();
 const cors = require("cors");
+const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const mongoose = require("mongoose");
 const connectDB = require("./db/index");
-
+const userRouter = require("./routes/auth/user.routes");
+const passport = require("passport");
 require("dotenv").config();
 
 const startServer = () => {
@@ -14,7 +15,7 @@ const startServer = () => {
   });
 };
 
-// middlewares setup to parse incoming requests and cookies, and also to handle CORS
+// Middlewares setup to parse incoming requests and cookies, and also to handle CORS
 app.use(cookieParser());
 app.use(express.json());
 app.use(
@@ -25,5 +26,19 @@ app.use(
   })
 );
 
-// mongoDB connection
+// Move session middleware above passport middleware
+app.use(
+  session({
+    secret: process.env.EXPRESS_SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Routes
+app.use("/api/v1/users", userRouter);
+
+// MongoDB connection
 connectDB().then(startServer);

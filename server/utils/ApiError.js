@@ -1,5 +1,5 @@
 // Importing the errorHandler middleware
-import { errorHandler } from "../middlewares/error.middlewares.js";
+// const {errorHandler} = require ("../middlewares/error.middlewares.js");
 
 /**
  * Common Error class for throwing errors in a standardized way.
@@ -36,4 +36,4 @@ class ApiError extends Error {
 }
 
 // Export the ApiError class
-export { ApiError };
+module.exports = { ApiError };

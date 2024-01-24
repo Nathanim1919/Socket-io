@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const User = require("../models/user.models");
+const {User} = require("../models/user.models");
 
 const {
   sendEmail,
@@ -449,7 +449,7 @@ const handleSocialLogin = asyncHandler(async (req, res) => {
 })
 
 
-export {
+module.exports = {
   assignRole,
   changeCurrentPassword,
   forgotPasswordRequest,
